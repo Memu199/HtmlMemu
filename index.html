@@ -1,330 +1,160 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Galaxia de Amor</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هدية رائعة</title>
 <style>
-  /* Reset */
-  *{box-sizing:border-box;margin:0;padding:0}
+body {
+  margin:0;
+  padding:0;
+  font-family:'Segoe UI', sans-serif;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: radial-gradient(circle at center, #ffe5e5, #ff99cc);
+  overflow:hidden;
+  flex-direction:column;
+}
 
-  html,body{height:100%}
-  body{
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: radial-gradient(ellipse at center, #0b0f2a 0%, #05060a 60%, #000 100%);
-    color:#fff;
-    overflow:hidden;
-  }
+.gift-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
 
-  /* Canvas full screen */
-  #space {
-    position:fixed;
-    inset:0;
-    z-index:0;
-    display:block;
-  }
+.gift-container.shake {
+  animation: shake 0.3s;
+}
 
-  /* Center content */
-  .ui {
-    position:relative;
-    z-index:3;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    gap:18px;
-    text-align:center;
-    padding:24px;
-    pointer-events:none; /* avoid blocking canvas clicks */
-  }
+@keyframes shake {
+  0% { transform: translate(0,0) rotate(0deg); }
+  20% { transform: translate(-5px,0) rotate(-10deg);}
+  40% { transform: translate(5px,0) rotate(10deg);}
+  60% { transform: translate(-5px,0) rotate(-10deg);}
+  80% { transform: translate(5px,0) rotate(10deg);}
+  100% { transform: translate(0,0) rotate(0deg);}
+}
 
-  h1{
-    pointer-events:auto;
-    background: linear-gradient(90deg, #ff9db1, #ffd38a, #cfa6ff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-size: clamp(28px, 6vw, 64px);
-    letter-spacing:1px;
-    text-shadow: 0 6px 30px rgba(120,40,80,0.18);
-    margin-bottom:6px;
-  }
+.gift-img {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s;
+}
 
-  p.lead{
-    color: rgba(255,255,255,0.85);
-    max-width:720px;
-    pointer-events:auto;
-  }
+.gift-img.open {
+  transform: rotateX(30deg) rotateY(20deg) scale(1.1);
+}
 
-  /* controls */
-  .controls {
-    display:flex;
-    gap:12px;
-    margin-top:12px;
-    pointer-events:auto;
-  }
-  button{
-    background: rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.08);
-    color:#fff;
-    padding:10px 16px;
-    font-size:15px;
-    border-radius:12px;
-    backdrop-filter: blur(6px);
-    cursor:pointer;
-  }
-  button:active{transform:translateY(1px)}
-  .small {font-size:13px;padding:8px 12px;border-radius:10px}
+.message {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  font-size:32px;
+  color:#fff;
+  text-shadow:0 4px 12px rgba(0,0,0,0.5);
+  opacity:0;
+  transition: opacity 1s;
+  text-align:center;
+}
 
-  /* bottom credits */
-  .credit{
-    position:fixed;
-    bottom:10px;
-    left:10px;
-    font-size:13px;
-    color: rgba(255,255,255,0.6);
-    z-index:4;
-    pointer-events:auto;
-  }
+.message.show {
+  opacity:1;
+}
 
-  /* responsive hint */
-  @media (max-width:520px){
-    p.lead{font-size:14px}
-    .controls{flex-direction:column}
-  }
+.message-text {
+  font-size:18px;
+  margin-top:10px;
+  opacity:0;
+  transition: opacity 1s;
+}
+
+.message-text.show {
+  opacity:1;
+}
+
+.heart {
+  position:absolute;
+  width:24px;
+  height:24px;
+  background-color: #ff4da6;
+  clip-path: polygon(50% 0%, 61% 13%, 75% 13%, 87% 25%, 87% 38%, 75% 50%, 50% 75%, 25% 50%, 13% 38%, 13% 25%, 25% 13%, 39% 13%);
+  animation: float 2s linear forwards;
+}
+
+@keyframes float {
+  0% { transform: translateY(0) scale(1); opacity:1; }
+  100% { transform: translateY(-200px) scale(1.3); opacity:0; }
+}
 </style>
 </head>
 <body>
-<canvas id="space"></canvas>
 
-<div class="ui" aria-hidden="false">
-  <h1>Galaxia de Amor</h1>
-  <p class="lead">مجرة صغيرة مليانة نجوم وقلوب طايرة — اضغط على المساحة أو على زر "أطلق قلوب" لخلق موجة قلوب.</p>
-  <div class="controls">
-    <button id="btn-toggle-stars" class="small">إيقاف النجوم</button>
-    <button id="btn-heart" class="small">أطلق قلوب</button>
-    <button id="btn-clear" class="small">إعادة ضبط</button>
+<div class="gift-container" id="gift">
+  <img src="https://i.ibb.co/4W1n2Z6/gift.png" alt="هدية" class="gift-img" id="giftImg">
+  <div class="message" id="message">
+    Noor
+    <div class="message-text" id="messageText">عيد سعيد لك يا Noor!</div>
   </div>
 </div>
 
-<div class="credit">✦ تصميم سريع — عدّل وخلّيها حلوة :)</div>
+<audio id="bg-music" loop>
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  متصفحك لا يدعم الصوت
+</audio>
 
 <script>
-/* ======= Canvas setup ======= */
-const canvas = document.getElementById('space');
-const ctx = canvas.getContext('2d', {alpha:true});
-let DPR = Math.max(1, window.devicePixelRatio || 1);
+const gift = document.getElementById('gift');
+const giftImg = document.getElementById('giftImg');
+const message = document.getElementById('message');
+const messageText = document.getElementById('messageText');
+const music = document.getElementById('bg-music');
+let clickCount = 0;
 
-function resize() {
-  DPR = Math.max(1, window.devicePixelRatio || 1);
-  canvas.width = Math.floor(window.innerWidth * DPR);
-  canvas.height = Math.floor(window.innerHeight * DPR);
-  canvas.style.width = window.innerWidth + 'px';
-  canvas.style.height = window.innerHeight + 'px';
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-}
-resize();
-window.addEventListener('resize', resize);
-
-/* ======= Stars background ======= */
-const stars = [];
-const STAR_COUNT = 160;
-let starsEnabled = true;
-
-function initStars(){
-  stars.length = 0;
-  for(let i=0;i<STAR_COUNT;i++){
-    stars.push({
-      x: Math.random()*window.innerWidth,
-      y: Math.random()*window.innerHeight,
-      r: Math.random()*1.4 + 0.2,
-      alpha: Math.random()*0.9 + 0.1,
-      twinkleSpeed: Math.random()*0.02 + 0.002
-    });
-  }
-}
-initStars();
-
-/* ======= Hearts particle system ======= */
-const hearts = [];
-const gravity = 0.02;
-
-function rand(min,max){ return Math.random()*(max-min)+min; }
-
-/* draw heart shape at (x,y) with scale s and rotation */
-function drawHeart(x,y,s,rot,alpha,fill=true){
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.rotate(rot);
-  ctx.beginPath();
-  // parametric heart via bezier-ish shape
-  ctx.moveTo(0, -10 * s);
-  ctx.bezierCurveTo(25*s, -40*s, 75*s, -15*s, 0, 55*s);
-  ctx.bezierCurveTo(-75*s, -15*s, -25*s, -40*s, 0, -10*s);
-  ctx.closePath();
-  ctx.globalAlpha = alpha;
-  if(fill){
-    // gradient fill
-    const g = ctx.createLinearGradient(-40*s, -40*s, 40*s, 40*s);
-    g.addColorStop(0, 'rgba(255,110,137,0.98)');
-    g.addColorStop(0.5, 'rgba(255,200,120,0.95)');
-    g.addColorStop(1, 'rgba(206,120,255,0.9)');
-    ctx.fillStyle = g;
-    ctx.fill();
-    // soft stroke
-    ctx.lineWidth = Math.max(0.6, 1.6*s);
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
-    ctx.stroke();
-  } else {
-    ctx.strokeStyle = 'rgba(255,110,137,'+alpha+')';
-    ctx.stroke();
-  }
-  ctx.restore();
+// إنشاء قلب عند النقر
+function createHeart(x,y){
+  const heart = document.createElement('div');
+  heart.classList.add('heart');
+  heart.style.left = x - 12 + 'px';
+  heart.style.top = y - 12 + 'px';
+  document.body.appendChild(heart);
+  setTimeout(()=>{ heart.remove(); }, 2000);
 }
 
-function spawnHeart(x,y,opts = {}) {
-  hearts.push({
-    x: x,
-    y: y,
-    vx: rand(-1.2,1.2),
-    vy: rand(-3.2,-1.0),
-    size: rand(0.35, 1.4),
-    rot: rand(-0.6,0.6),
-    rotSpeed: rand(-0.02,0.02),
-    life: rand(2.6,4.2), // seconds
-    age: 0,
-    fade: 0.98,
-    options: opts
-  });
+// انفجار قلوب صغيرة عند ظهور الرسالة
+function burstHearts(){
+  for(let i=0;i<30;i++){
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.style.left = gift.offsetLeft + 110 + (Math.random()*100-50) + 'px';
+    heart.style.top = gift.offsetTop + 110 + (Math.random()*100-50) + 'px';
+    document.body.appendChild(heart);
+    setTimeout(()=>{ heart.remove(); }, 2500);
+  }
 }
 
-/* create random ambient small hearts */
-for(let i=0;i<18;i++){
-  spawnHeart(rand(0,window.innerWidth), rand(0,window.innerHeight), {ambient:true});
-}
+gift.addEventListener('click', (e)=>{
+  clickCount++;
+  gift.classList.add('shake');
+  setTimeout(()=>{ gift.classList.remove('shake'); },300);
+  giftImg.classList.add('open');
 
-/* ======= Animation loop ======= */
-let last = performance.now();
-function animate(now){
-  const dt = (now - last) / 1000;
-  last = now;
-  // clear (slightly transparent to get motion trails)
-  ctx.clearRect(0,0,canvas.width,DPR ? canvas.height/DPR : canvas.height);
+  const x = e.clientX;
+  const y = e.clientY;
+  createHeart(x,y);
 
-  // draw gradient glow (very subtle)
-  const radial = ctx.createRadialGradient(window.innerWidth/2, window.innerHeight/2, 10, window.innerWidth/2, window.innerHeight/2, Math.max(window.innerWidth, window.innerHeight));
-  radial.addColorStop(0,'rgba(60,18,40,0.06)');
-  radial.addColorStop(1,'rgba(0,0,0,0.6)');
-  ctx.fillStyle = radial;
-  ctx.fillRect(0,0,window.innerWidth, window.innerHeight);
-
-  // stars
-  if(starsEnabled){
-    for(const s of stars){
-      s.alpha += (Math.sin(now*0.001*s.twinkleSpeed*1000)+1)*0.0008;
-      // twinkle clamp
-      s.alpha = Math.max(0.02, Math.min(1, s.alpha + Math.sin(now*0.001*s.twinkleSpeed*1000)*0.004));
-      ctx.beginPath();
-      ctx.globalAlpha = s.alpha * 0.95;
-      ctx.fillStyle = 'white';
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  // subtle drifting nebula (simple moving translucent circles)
-  const t = now * 0.0002;
-  for(let i=0;i<4;i++){
-    ctx.beginPath();
-    ctx.globalAlpha = 0.035;
-    ctx.fillStyle = (i % 2 === 0) ? '#ff7fb3' : '#a18bff';
-    const cx = (window.innerWidth*0.2) + ((Math.sin(t* (0.6+i*0.4) + i) + 1) * window.innerWidth*0.4);
-    const cy = (window.innerHeight*0.2) + ((Math.cos(t* (0.7+i*0.5)) + 1) * window.innerHeight*0.35);
-    ctx.ellipse(cx, cy, window.innerWidth*0.5, window.innerHeight*0.3, Math.sin(t+i)*0.4, 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-
-  // hearts update + draw
-  for(let i = hearts.length-1; i >= 0; i--){
-    const h = hearts[i];
-    h.age += dt;
-    // motion
-    h.vy += gravity * dt * 60; // scaled
-    h.x += h.vx * (dt*60);
-    h.y += h.vy * (dt*60);
-    h.rot += h.rotSpeed;
-
-    // fade out approaching end of life
-    const progress = h.age / h.life;
-    const alpha = Math.max(0, 1 - progress);
-    // draw
-    drawHeart(h.x, h.y, h.size*14, h.rot, alpha * (h.options.ambient ? 0.6 : 1.0));
-
-    // remove if dead or out of screen
-    if(progress >= 1 || h.y > window.innerHeight + 60 || h.x < -100 || h.x > window.innerWidth+100) {
-      hearts.splice(i,1);
-    }
-  }
-
-  // small cleanup spawn so ambient feels continuous
-  if(Math.random() < 0.02){
-    spawnHeart(rand(20, window.innerWidth-20), window.innerHeight + rand(-40,-10), {ambient:true});
-  }
-
-  requestAnimationFrame(animate);
-}
-requestAnimationFrame(animate);
-
-/* ======= UI interactions ======= */
-const btnStars = document.getElementById('btn-toggle-stars');
-const btnHeart = document.getElementById('btn-heart');
-const btnClear = document.getElementById('btn-clear');
-
-btnStars.addEventListener('click', ()=>{
-  starsEnabled = !starsEnabled;
-  btnStars.textContent = starsEnabled ? 'إيقاف النجوم' : 'تشغيل النجوم';
-});
-
-btnHeart.addEventListener('click', ()=>{
-  // spawn burst from center
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
-  for(let i=0;i<28;i++){
-    spawnHeart(cx + rand(-60,60), cy + rand(-40,40));
-  }
-});
-
-btnClear.addEventListener('click', ()=>{
-  hearts.length = 0;
-});
-
-/* click/tap spawns small burst where user clicked */
-canvas.addEventListener('pointerdown', (e)=>{
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  for(let i=0;i<10;i++){
-    spawnHeart(x + rand(-18,18), y + rand(-18,18));
-  }
-});
-
-/* keyboard: space -> burst, s -> toggle stars, c -> clear */
-window.addEventListener('keydown', (e)=>{
-  if(e.code === 'Space'){ e.preventDefault(); btnHeart.click(); }
-  if(e.key.toLowerCase() === 's') btnStars.click();
-  if(e.key.toLowerCase() === 'c') btnClear.click();
-});
-
-/* helpful: keep canvas resizing hearts area responsive */
-window.addEventListener('resize', ()=>{
-  // small spawn adjust so visuals persist
-  for(let i=0;i<6;i++){
-    spawnHeart(rand(0,window.innerWidth), rand(0,window.innerHeight), {ambient:true});
+  if(clickCount >= 5){
+    message.classList.add('show');
+    setTimeout(()=>{ messageText.classList.add('show'); },500);
+    music.play();
+    burstHearts();
   }
 });
 </script>
+
 </body>
 </html>
